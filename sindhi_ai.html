@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="sd">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sindhi AI Assistant</title>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Nastaliq+Urdu&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Noto Nastaliq Urdu', serif;
+      background: linear-gradient(to right, #e0ecf3, #f5f5f5);
+      text-align: center;
+      direction: rtl;
+      margin: 0;
+      padding: 0;
+    }
+    h2 {
+      background-color: #1a73e8;
+      color: white;
+      padding: 15px;
+      margin: 0;
+      font-size: 28px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    }
+    #chatbox {
+      width: 90%;
+      max-width: 600px;
+      margin: 20px auto;
+      background: white;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 0 12px rgba(0, 0, 0, 0.2);
+      height: 420px;
+      overflow-y: auto;
+    }
+    .message {
+      margin: 10px;
+      padding: 12px 18px;
+      border-radius: 18px;
+      display: inline-block;
+      max-width: 80%;
+      font-size: 18px;
+      line-height: 1.6;
+    }
+    .user {
+      background: #d4edda;
+      float: right;
+      clear: both;
+      text-align: right;
+    }
+    .bot {
+      background: #d1ecf1;
+      float: left;
+      clear: both;
+      text-align: left;
+    }
+    #inputArea {
+      margin-top: 20px;
+    }
+    input[type="text"] {
+      padding: 12px;
+      width: 60%;
+      font-size: 18px;
+      border-radius: 10px;
+      border: 1px solid #ccc;
+      outline: none;
+    }
+    button {
+      padding: 12px 16px;
+      font-size: 18px;
+      margin: 5px;
+      background-color: #1a73e8;
+      color: white;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+    button:hover {
+      background-color: #0c5cd8;
+    }
+  </style>
+</head>
+<body>
+
+  <h2>🤖 سنڌي AI مددگار</h2>
+  <div id="chatbox"></div>
+
+  <div id="inputArea">
+    <input id="userInput" type="text" placeholder="پنھنجو سوال لکو..." />
+    <button onclick="sendMessage()">موڪليو</button>
+    <button onclick="clearChat()">🧹 صاف</button>
+  </div>
+
+  <script>
+    const chatbox = document.getElementById("chatbox");
+
+    function sendMessage() {
+      let input = document.getElementById("userInput");
+      let message = input.value.trim();
+      if (!message) return;
+      appendMessage(message, 'user');
+      getBotReply(message);
+      input.value = "";
+    }
+
+    function appendMessage(text, sender) {
+      const msgDiv = document.createElement("div");
+      msgDiv.className = `message ${sender}`;
+      msgDiv.innerText = text;
+      chatbox.appendChild(msgDiv);
+      chatbox.scrollTop = chatbox.scrollHeight;
+    }
+
+    async function getBotReply(msg) {
+      appendMessage("⏳ جواب تيار پيو ٿئي...", 'bot');
+
+      try {
+        const response = await fetch('http://localhost:5000/chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ message: msg }),
+        });
+        const data = await response.json();
+        const reply = data.reply || "معاف ڪجو، مان جواب نٿو ڏئي سگهان.";
+
+        const lastBotMsg = chatbox.querySelector(".bot:last-child");
+        if (lastBotMsg) lastBotMsg.innerText = reply;
+
+      } catch (err) {
+        appendMessage("معاف ڪجو، سرور سان مسئلو آهي.", 'bot');
+      }
+    }
+
+    function clearChat() {
+      chatbox.innerHTML = "";
+    }
+  </script>
+
+</body>
+</html>
